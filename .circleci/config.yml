@@ -840,6 +840,36 @@ jobs:
             npm --version
             test/externalTests/solc-js/solc-js.sh /tmp/workspace/soljson.js $(cat /tmp/workspace/version.txt)
 
+  t_ems_ext_hardhat:
+    docker:
+      - image: circleci/node
+    environment:
+      TERM: xterm
+      HARDHAT_TESTS_SOLC_PATH: soljson.js
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/workspace
+      - run: git clone --depth 1 https://github.com/nomiclabs/hardhat.git
+      - run:
+          name: Create a link to the compiler binary in a place where Hardhat can find it
+          command: |
+            mkdir hardhat/packages/hardhat-core/test/internal/hardhat-network/stack-traces/compilers/
+            ln -s /tmp/workspace/soljson.js hardhat/packages/hardhat-core/test/internal/hardhat-network/stack-traces/compilers/
+      - run:
+          name: Install dependencies and build Hardhat
+          command: |
+            cd hardhat
+            yarn
+            yarn build
+      - run:
+          name: Run hardhat-core test suite
+          command: |
+            HARDHAT_TESTS_SOLC_VERSION=$(scripts/get_version.sh)
+            export HARDHAT_TESTS_SOLC_VERSION
+            cd hardhat/packages/hardhat-core
+            yarn test
+
   t_ems_ext:
     parameters:
       project:
@@ -1110,6 +1140,7 @@ workflows:
       # Emscripten build and tests that take 15 minutes or less
       - b_ems: *workflow_trigger_on_tags
       - t_ems_solcjs: *workflow_emscripten
+      - t_ems_ext_hardhat: *workflow_emscripten
 
       - t_ems_ext:
           <<: *workflow_emscripten

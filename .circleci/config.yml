@@ -852,16 +852,17 @@ jobs:
           at: /tmp/workspace
       - run: git clone --depth 1 https://github.com/nomiclabs/hardhat.git
       - run:
-          name: Install dependencies and build Hardhat
+          name: Install dependencies
           command: |
             cd hardhat
             yarn
-            yarn build
       - run:
           name: Run hardhat-core test suite
           command: |
             HARDHAT_TESTS_SOLC_VERSION=$(scripts/get_version.sh)
             export HARDHAT_TESTS_SOLC_VERSION
+
+            # NOTE: This is expected to work without running `yarn build` first.
             cd hardhat/packages/hardhat-core
             yarn test
 

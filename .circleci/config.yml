@@ -845,17 +845,12 @@ jobs:
       - image: circleci/node
     environment:
       TERM: xterm
-      HARDHAT_TESTS_SOLC_PATH: soljson.js
+      HARDHAT_TESTS_SOLC_PATH: /tmp/soljson.js
     steps:
       - checkout
       - attach_workspace:
           at: /tmp/workspace
       - run: git clone --depth 1 https://github.com/nomiclabs/hardhat.git
-      - run:
-          name: Create a link to the compiler binary in a place where Hardhat can find it
-          command: |
-            mkdir hardhat/packages/hardhat-core/test/internal/hardhat-network/stack-traces/compilers/
-            ln -s /tmp/workspace/soljson.js hardhat/packages/hardhat-core/test/internal/hardhat-network/stack-traces/compilers/
       - run:
           name: Install dependencies and build Hardhat
           command: |
